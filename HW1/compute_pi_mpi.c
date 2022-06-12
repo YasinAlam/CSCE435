@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
 
     if (myid == 0) {
         error_pi = fabs(3.14159265358979323846 - pi)/3.14159265358979323846;
-        printf("n = %ld, p = %d, pi = %.16f, relative error = %.2e, time (sec) = %8.4f\n", n, numprocs, pi, error_pi, total_time);
+        //printf("n = %ld, p = %d, pi = %.16f, relative error = %.2e, time (sec) = %8.4f\n", n, numprocs, pi, error_pi, total_time);
+	printf("%ld, %d, %.16f, %.2e, %8.4f\n", n, numprocs, pi, error_pi, total_time);
     }
     MPI_Finalize();
 }

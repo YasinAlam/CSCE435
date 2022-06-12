@@ -9,7 +9,7 @@
 #include <math.h>
 #include <sys/time.h>
 
-#define MAX_THREADS     1024 // Change this for HW assignment
+#define MAX_THREADS     8192 // Change this for HW assignment
 
 pthread_t p_threads[MAX_THREADS];
 pthread_attr_t attr;
@@ -73,8 +73,12 @@ int main(int argc, char *argv[]) {
 
     computed_pi = (4.0*total_hits)/sample_points;
     error_pi = fabs(3.14159265358979323846 - computed_pi)/3.14159265358979323846;
-    printf("Trials = %ld, Threads = %4d, pi = %14.10f, error = %8.2e, time (sec) = %8.4f\n", 
-	    sample_points, num_threads, computed_pi, error_pi, total_time);
+    //printf("Trials = %ld, Threads = %4d, pi = %14.10f, error = %8.2e, time (sec) = %8.4f\n", 
+	//    sample_points, num_threads, computed_pi, error_pi, total_time);
+    printf("%ld, %4d, %14.10f, %8.2e, %8.4f\n",
+	sample_points, num_threads, computed_pi, error_pi, total_time);
+
+
     pthread_attr_destroy(&attr);
 
 }

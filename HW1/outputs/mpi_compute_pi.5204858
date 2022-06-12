@@ -1,0 +1,39 @@
+Processes = 1
+n = 10000000000, p = 1, pi = 3.1415926535894507, relative error = 1.09e-13, time (sec) = 149.4017
+Processes = 4
+n = 10000000000, p = 4, pi = 3.1415926535897554, relative error = 1.20e-14, time (sec) =  41.0346
+Processes = 8
+n = 10000000000, p = 8, pi = 3.1415926535898286, relative error = 1.13e-14, time (sec) =  20.5965
+Processes = 16
+n = 10000000000, p = 16, pi = 3.1415926535897767, relative error = 5.23e-15, time (sec) =  10.3023
+Processes = 32
+n = 10000000000, p = 32, pi = 3.1415926535898047, relative error = 3.68e-15, time (sec) =   5.1621
+Processes = 64
+n = 10000000000, p = 64, pi = 3.1415926535897745, relative error = 5.94e-15, time (sec) =   2.5876
+Processes = 64
+n = 1000000000, p = 64, pi = 3.1415926535898087, relative error = 4.95e-15, time (sec) =   0.2599
+Processes = 64
+n = 10000000, p = 64, pi = 3.1415926535897949, relative error = 5.65e-16, time (sec) =   0.0030
+Processes = 64
+n = 100000, p = 64, pi = 3.1415926535981273, relative error = 2.65e-12, time (sec) =   0.0004
+Processes = 64
+n = 1000, p = 64, pi = 3.1415927369231262, relative error = 2.65e-08, time (sec) =   0.0026
+Remember to run Q6
+Q7
+Processes = 64, n = 100
+n = 100, p = 64, pi = 3.1416009869231249, relative error = 2.65e-06, time (sec) =   0.0013
+Processes = 64, n = 10000
+n = 10000, p = 64, pi = 3.1415926544231265, relative error = 2.65e-10, time (sec) =   0.0009
+Processes = 64, n = 1000000
+n = 1000000, p = 64, pi = 3.1415926535898753, relative error = 2.62e-14, time (sec) =   0.0006
+Processes = 64, n = 100000000
+n = 100000000, p = 64, pi = 3.1415926535897940, relative error = 2.83e-16, time (sec) =   0.0268
+Q7.1
+Processes = 1, n = 100
+n = 100, p = 1, pi = 3.1416009869231254, relative error = 2.65e-06, time (sec) =   0.0001
+Processes = 1, n = 10000
+n = 10000, p = 1, pi = 3.1415926544231341, relative error = 2.65e-10, time (sec) =   0.0004
+Processes = 1, n = 1000000
+n = 1000000, p = 1, pi = 3.1415926535897643, relative error = 9.19e-15, time (sec) =   0.0156
+Processes = 1, n = 100000000
+n = 100000000, p = 1, pi = 3.1415926535904264, relative error = 2.02e-13, time (sec) =   1.4933
