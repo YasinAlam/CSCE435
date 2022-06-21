@@ -36,7 +36,17 @@ void barrier_simple () {
 
     // * 
     // * 
-    // * Put your code here ...
+    pthread_mutex_lock(&lock_barrier);
+    count++;
+   
+    while(count < num_threads)
+	pthread_cond_wait(&cond_barrier, &lock_barrier);
+    pthread_cond_signal(&cond_barrier);
+    pthread_mutex_unlock(&lock_barrier);
+    
+
+   
+    
     // * 
     // * 
 
