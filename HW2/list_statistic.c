@@ -17,11 +17,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-
 #define MAX_THREADS     65536
 #define MAX_LIST_SIZE   268435456
-
-
 int num_threads;		// Number of threads to create - user input 
 
 int thread_id[MAX_THREADS];	// User defined id for thread
@@ -29,7 +26,8 @@ pthread_t p_threads[MAX_THREADS];// Threads
 pthread_attr_t attr;		// Thread attributes 
 
 pthread_mutex_t lock_minimum;	// Protects minimum, count
-int minimum;			// Minimum value in the list
+long double mean;
+long double standard_deviation;	// std_dev of the entire list
 int count;			// Count of threads that have updated minimum
 
 int list[MAX_LIST_SIZE];	// List of values
@@ -37,7 +35,7 @@ int list_size;			// List size
 
 // Thread routine to compute minimum of sublist assigned to thread; 
 // update global value of minimum if necessary
-void *find_minimum (void *s) {
+void *find_minimum (void *s) { //I will keep this function name even though i shouldn't
     int j;
     int my_thread_id = *((int *)s);
 
@@ -47,19 +45,31 @@ void *find_minimum (void *s) {
     if (my_thread_id == num_threads-1) my_end = list_size-1;
 
     // Thread computes minimum of list[my_start ... my_end]
-    int my_minimum = list[my_start]; 
+    long double sum  = list[my_start];
+    long double sum_squared = pow(sum,2);
     for (j = my_start+1; j <= my_end; j++) {
-	if (my_minimum > list[j]) my_minimum = list[j]; 
+	sum+=list[j]; 
+	sum_squared += pow(list[j],2);
     }
+ 
+    
 
-    // Thread updates minimum 
+    // Thread updates mean and std 
     // *
     // *
     pthread_mutex_lock(&lock_minimum);
-    if(count == 0) {minimum = my_minimum;} //If first thread then just update
-    else if(my_minimum < minimum) {minimum = my_minimum;}
     count++;
-    
+    mean+=sum; // u = s/N
+    standard_deviation+=sum_squared; //var = ss/N - uu
+
+    if(count == num_threads) //last thread
+    {
+	mean/=list_size; // last thread divides
+	standard_deviation = sqrtl(standard_deviation/list_size - powl(mean,2)); //last thread really computes std
+	//printf("std = %Lf \n", standard_deviation);
+	//printf("Count = %d \n", count); //check to make sure counted right because counting is hard
+        
+    }
     pthread_mutex_unlock(&lock_minimum);
     // *
     // *
@@ -75,7 +85,8 @@ int main(int argc, char *argv[]) {
     struct timespec start, stop;
     double total_time, time_res;
     int i, j; 
-    int true_minimum;
+    long double true_mean;
+    long double true_std;
 
     if (argc != 3) {
 	printf("Need two integers as input \n"); 
@@ -103,13 +114,16 @@ int main(int argc, char *argv[]) {
     // Initialize list, compute minimum to verify result
     srand48(0); 	// seed the random number generator
     list[0] = lrand48(); 
-    true_minimum = list[0];
+    long double sum = list[0];
+    long double sum_sq = pow(list[0],2);   
     for (j = 1; j < list_size; j++) {
 	list[j] = lrand48(); 
-	if (true_minimum > list[j]) {
-	    true_minimum = list[j];
-	}
+	sum+=list[j];
+	sum_sq += pow(list[j],2);
     }
+    true_mean = sum/list_size;
+    true_std = sqrtl(sum_sq/list_size - powl(true_mean,2));
+    //printf("true_std = %Lf \n", true_std);
 
     // Initialize count
     count = 0;
@@ -131,12 +145,12 @@ int main(int argc, char *argv[]) {
 	+0.000000001*(stop.tv_nsec-start.tv_nsec);
 
     // Check answer
-    if (true_minimum != minimum) {
-	printf("Houston, we have a problem!\n"); 
+    if (abs(true_mean - mean) > 1e-5 || abs(true_std - standard_deviation) > 1e-5)  { //correct for floating point error
+	printf("Houston, we have a problem!\n True mean = %Lf \n, True std = %Lf \n", true_mean, true_std); 
     }
     // Print time taken
-    printf("Threads = %d, minimum = %d, time (sec) = %8.4f\n", 
-	    num_threads, minimum, total_time);
+    printf("Threads = %d, mean = %Lf, std_dev = %Lf, time (sec) = %8.4f\n", 
+	    num_threads, mean, standard_deviation, total_time);
 
     // Destroy mutex and attribute structures
     pthread_attr_destroy(&attr);

@@ -1,4 +1,4 @@
-//
+Options//
 // Computes the minimum of a list using multiple threads
 //
 // Warning: Return values of calls are not checked for error to keep 
@@ -55,12 +55,7 @@ void *find_minimum (void *s) {
     // Thread updates minimum 
     // *
     // *
-    pthread_mutex_lock(&lock_minimum);
-    if(count == 0) {minimum = my_minimum;} //If first thread then just update
-    else if(my_minimum < minimum) {minimum = my_minimum;}
-    count++;
-    
-    pthread_mutex_unlock(&lock_minimum);
+    // Put your code here ...
     // *
     // *
 
