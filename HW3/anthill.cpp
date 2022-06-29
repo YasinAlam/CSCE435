@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <new>
 #include <omp.h>
-
+#include <cmath>
 using namespace std;
 
 // ---------------------------------------------------------------------------------
@@ -238,13 +238,59 @@ void Lawn_Class::save_Lawn_to_file () {
 }
 // ---------------------------------------------------------------------------------
 // Main program to find the anthill
-// 
+//
+//
+double grad_ascend(Lawn_Class &lawn, int &x, int &y, double current_val)
+{
+    int new_x = x;
+    int new_y = y;
+    int m = lawn.m;
+
+    //We will only check cardinal directions
+    //
+    double val_left = (x-1 >= 0) ? lawn.number_of_ants_in_cell(x-1,y) : 0;
+    double val_right = (x+1 < m) ? lawn.number_of_ants_in_cell(x+1,y) : 0;
+    double val_bottom = (y+1 < m) ? lawn.number_of_ants_in_cell(x,y+1) : 0;
+    double val_top = (y-1 >= 0) ? lawn.number_of_ants_in_cell(x,y-1) : 0;
+    //inefficient code but prevents from calling twice for assignment 
+    if((x-1 >= 0) && val_left >= current_val) //check left
+    {
+	current_val = val_left;
+	new_x = x-1;
+	new_y = y;	
+    }    
+    if((x+1 < m) && val_right >= current_val) //check right
+    {
+        current_val = val_right;
+        new_x = x+1;
+        new_y = y;
+    }
+    if((y+1 < m) && val_bottom >= current_val) //check bottom
+    {
+        current_val = val_bottom;
+        new_x = x;
+        new_y = y+1;
+    }
+    if((y-1 >= 0) && val_top >= current_val) //check top
+    {
+        current_val = val_top;
+        new_x = x;
+        new_y = y-1;
+    }
+
+    x = new_x;
+    y = new_y;
+
+    return current_val; //current value of cell
+}
+	
 
 int main (int argc, char **argv) {
 
     double start_time, execution_time; // Variables to determine execution time
 
     Lawn_Class MyLawn;	// Create object MyLawn
+
 
     if (argc != 5) { 
 	printf("Use: <executable_name> <lawn_size> <anthill_x> <anthill_y> <steps>\n"); 
@@ -263,21 +309,53 @@ int main (int argc, char **argv) {
     MyLawn.save_Lawn_to_file(); // Not recommended when size is large
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Example Approach #1: Brute force approach
-
+    // Approach : Gradient Ascent
+   
     start_time = omp_get_wtime(); 
     volatile int found = 0;
-#pragma omp parallel for default(none) shared(MyLawn, found) 
-    for (int i = 0; i < MyLawn.m; i++) {
-	for (int j = 0; j < MyLawn.m; j++) {
-	    if (found == 0) {
-		if (MyLawn.guess_anthill_location(i,j) == 1) {
-		    found = 1;
+#pragma omp parallel default(none) shared(MyLawn, found)
+{
+   //split evenly
+   int sections = (MyLawn.m*MyLawn.m)/omp_get_num_threads(); //Unravel sections
+   int start = sections * omp_get_thread_num(); //R2 -> R1
+   //guess a point to start at based on thread
+   int rx = floor(start/MyLawn.m); 
+   int ry = start%MyLawn.m;
+   //for comparison when found points
+   int oldx = rx;
+   int oldy = ry;
+
+   //printf("Thread %d is starting at (%d,%d)\n", omp_get_thread_num(), rx, ry);
+   
+
+   //baseline max
+   double current_val = 0.; //first max as all > 0 for t>0   
+   //printf("all vals initialized threads: %d \n", omp_get_num_threads());    
+   while(found == 0)
+   {
+	current_val = grad_ascend(MyLawn, rx, ry, current_val); //finds max point which is closest
+	//printf("Thread %d new val: (%d,%d)\n,", omp_get_thread_num(), rx, ry);
+	if(rx == oldx && ry == oldy) //If at max, this is source
+	{
+	    if (MyLawn.guess_anthill_location(rx,ry) == 1)
+	    {
+	        found = 1;
 #pragma omp flush(found)
-		}
+	    }
+	    else
+	    {
+		printf("Algorithm Failed guessed (%d,%d) \n", rx,ry);
+		exit(-1);
 	    }
 	}
+	else
+	{
+	    oldx = rx;
+	    oldy = ry;
+	}	
     }
+}
+
     // #pragma parallel for ends here ...
     execution_time = omp_get_wtime() - start_time; 
 
